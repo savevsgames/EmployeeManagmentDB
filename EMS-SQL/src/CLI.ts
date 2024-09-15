@@ -9,6 +9,7 @@ import {
   updateEmployeeRole,
 } from "./Queries.ts";
 
+// Main menu function that prompts the user for what they would like to do - starts the program
 async function mainMenu() {
   const answers = await inquirer.prompt([
     {
@@ -30,25 +31,25 @@ async function mainMenu() {
 
   switch (answers.action) {
     case "View All Departments":
-      await viewDepartments();
+      await viewDepartments(); // async DB viewDepartments function
       break;
     case "View All Roles":
-      await viewRoles(); // Implement viewRoles function
+      await viewRoles(); // async DB viewRoles function
       break;
     case "View All Employees":
-      await viewEmployees(); // Implement viewEmployees function
+      await viewEmployees(); // async DB viewEmployees function
       break;
     case "Add Department":
-      await addDepartment();
+      await addDepartment(); // async DB addDepartment function
       break;
     case "Add Role":
-      await addRole(); // Implement addRole function
+      await addRole(); // async DB  addRole function
       break;
     case "Add Employee":
-      await addEmployee(); // Implement addEmployee function
+      await addEmployee(); // async DB addEmployee function
       break;
     case "Update Employee Role":
-      await updateEmployeeRole(); // Implement updateEmployeeRole function
+      await updateEmployeeRole(); // async DB updateEmployeeRole function
       break;
     case "Exit":
       console.log("Goodbye!");
@@ -59,4 +60,4 @@ async function mainMenu() {
   await mainMenu();
 }
 
-mainMenu();
+mainMenu(); // init function to start the program
