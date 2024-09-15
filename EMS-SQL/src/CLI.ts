@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-import { viewDepartments, addDepartment } from "./Queries";
+import { viewDepartments, addDepartment } from "./Queries.ts";
 
 async function mainMenu() {
   const answers = await inquirer.prompt([

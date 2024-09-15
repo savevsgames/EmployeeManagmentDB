@@ -1,8 +1,10 @@
+DO $$
+  DECLARE
+      -- Any variable declarations would go here
+  BEGIN
+      -- Begin transaction
 -- Seed data for the employee management system generated with ChatGPT
 
-$$ DO
-BEGIN
-    
 INSERT INTO department (name)
 VALUES 
 ('Human Resources'),
@@ -62,5 +64,11 @@ VALUES
 ('Nancy', 'Rodriguez', 19, NULL),  -- Customer Success Manager (No manager, top-level)
 ('Jacob', 'Lewis', 20, NULL);  -- Product Designer (No manager, top-level)
 
-END $$;
 
+RAISE NOTICE 'Transaction complete';
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'An error occurred: %', SQLERRM; -- Log the error
+        ROLLBACK; -- Explicitly roll back changes in case of error
+END $$;

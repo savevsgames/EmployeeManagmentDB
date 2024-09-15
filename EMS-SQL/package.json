@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "seed": "ts-node --project tsconfig.node.json src/seeds.ts",
-    "start": "ts-node src/cli.ts",
+    "start": "node --loader ts-node/esm src/cli.ts",
     "preview": "vite preview"
   },
   "devDependencies": {
