@@ -1,10 +1,10 @@
 import { Pool } from "pg";
 
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "ems_db",
-  password: "pgAdmin",
+  user: "ems_db_k7ff_user",
+  host: "dpg-crj8o93v2p9s738rrvkg-a",
+  database: "ems_db_k7ff",
+  password: process.env.POSTGRES_PW,
   port: 5432, // default port for PostgreSQL
 });
 

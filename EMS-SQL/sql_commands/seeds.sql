@@ -1,5 +1,8 @@
 -- Seed data for the employee management system generated with ChatGPT
 
+$$ DO
+BEGIN
+    
 INSERT INTO department (name)
 VALUES 
 ('Human Resources'),
@@ -58,3 +61,6 @@ VALUES
 ('George', 'Martinez', 18, NULL),  -- Chief Legal Officer (No manager, top-level)
 ('Nancy', 'Rodriguez', 19, NULL),  -- Customer Success Manager (No manager, top-level)
 ('Jacob', 'Lewis', 20, NULL);  -- Product Designer (No manager, top-level)
+
+END $$;
+
