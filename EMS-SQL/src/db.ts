@@ -1,11 +1,11 @@
 import { Pool } from "pg";
 
 const pool = new Pool({
-  user: "ems_db_k7ff_user",
-  host: "dpg-crj8o93v2p9s738rrvkg-a",
-  database: "ems_db_k7ff",
-  password: process.env.POSTGRES_PW,
-  port: 5432, // default port for PostgreSQL
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: Number(process.env.PG_PORT), // default port for PostgreSQL
 });
 
 export const query = async (text: string, params?: any[]) => {
