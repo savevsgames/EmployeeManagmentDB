@@ -1,8 +1,9 @@
-DROP DATABASE IF EXISTS employee;
-CREATE DATABASE employee;
+-- Drop existing tables if they exist, but don't drop the database itself
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS role CASCADE;
+DROP TABLE IF EXISTS department CASCADE;
 
-\c employee;
-
+-- Recreate the tables in the same database
 CREATE TABLE department (
     id SERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL

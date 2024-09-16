@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "schema": "ts-node src/runSchema.ts",
+    "seed": "ts-node src/runSeed.ts",
     "build": "tsc",
     "start": "node dist/cli.js",
     "serve-dist": "node dist/cli.js",
