@@ -1,4 +1,4 @@
-import { query } from "./db.ts"; // Location of DB connection function
+import { query } from "./db"; // Location of DB connection function
 
 const seedDatabase = async () => {
   try {

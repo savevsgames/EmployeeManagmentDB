@@ -1,4 +1,4 @@
-import { query } from "./db.ts";
+import { query } from "./db";
 import inquirer from "inquirer";
 
 // View all departments
@@ -89,12 +89,12 @@ export const addEmployee = async () => {
     {
       type: "number",
       name: "role_id",
-      message: "Enter the role id for the employee:",
+      message: "Enter the role id number for the employee:",
     },
     {
       type: "number",
       name: "manager_id",
-      message: "Enter the manager id for the employee:",
+      message: "Enter the manager id number for the employee:",
     },
   ]);
 
@@ -137,6 +137,12 @@ export const updateEmployeeRole = async () => {
       choices: roleChoices,
     },
   ]);
+  console.log(
+    "answers.role_id: ",
+    answers.role_id,
+    "answers.employee_id: ",
+    answers.employee_id
+  );
 
   await query("UPDATE employee SET role_id = $1 WHERE id = $2", [
     answers.role_id,

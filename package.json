@@ -2,21 +2,18 @@
   "name": "ems-sql",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "seed": "ts-node --project tsconfig.node.json src/seeds.ts",
-    "start": "node --loader ts-node/esm src/cli.ts",
-    "preview": "vite preview"
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "serve-dist": "node dist/cli.js",
+    "render-build": "npm run build && npm start"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.7",
     "@types/node": "^22.5.5",
     "@types/pg": "^8.11.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
-    "vite": "^5.4.1"
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
