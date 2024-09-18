@@ -8,6 +8,13 @@ import {
   addRole,
   addEmployee,
   updateEmployeeRole,
+  updateEmployeeManager,
+  viewEmployeesByManager,
+  viewEmployeesByDepartment,
+  deleteDepartment,
+  deleteRole,
+  deleteEmployee,
+  viewUtilizedBudgetByDepartment,
 } from "./Queries";
 
 // To allow for when render needs time to spin up, the database will have a retry timer
@@ -99,6 +106,13 @@ async function mainMenu() {
         "Add Role",
         "Add Employee",
         "Update Employee Role",
+        "Update Employee Manager",
+        "View Employees by Manager",
+        "View Employees by Department",
+        "Delete Department",
+        "Delete Role",
+        "Delete Employee",
+        "View Utilized Budget by Department",
         "Exit",
       ],
     },
@@ -125,6 +139,27 @@ async function mainMenu() {
       break;
     case "Update Employee Role":
       await updateEmployeeRole(); // async DB updateEmployeeRole function
+      break;
+    case "Update Employee Manager":
+      await updateEmployeeManager(); // async DB updateEmployeeManager function
+      break;
+    case "View Employees by Manager":
+      await viewEmployeesByManager(); // async DB viewEmployeesByManager function
+      break;
+    case "View Employees by Department":
+      await viewEmployeesByDepartment(); // async DB viewEmployeesByDepartment function
+      break;
+    case "Delete Department":
+      await deleteDepartment(); // async DB deleteDepartment function
+      break;
+    case "Delete Role":
+      await deleteRole(); // async DB deleteRole function
+      break;
+    case "Delete Employee":
+      await deleteEmployee(); // async DB deleteEmployee function
+      break;
+    case "View Utilized Budget by Department":
+      await viewUtilizedBudgetByDepartment(); // async DB viewUtilizedBudgetByDepartment function
       break;
     case "Exit":
       console.log("Goodbye!");

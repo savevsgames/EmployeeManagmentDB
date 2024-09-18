@@ -1,4 +1,3 @@
-import exp from "constants";
 import { query } from "./db";
 import inquirer from "inquirer";
 
@@ -7,9 +6,13 @@ import inquirer from "inquirer";
 // department names and department ids = * from department
 //
 export const viewDepartments = async () => {
-  const res = await query("SELECT * FROM department");
-  // console.table() is a method that displays tabular data as a table - used to display the results of the query
-  console.table(res.rows);
+  try {
+    const res = await query("SELECT * FROM department");
+    // console.table() is a method that displays tabular data as a table - used to display the results of the query
+    console.table(res.rows);
+  } catch (err) {
+    console.error("Error fetching departments: ", err);
+  }
 };
 
 //
@@ -17,11 +20,15 @@ export const viewDepartments = async () => {
 // job title, role id, the department that role belongs to, and the salary for that role
 //
 export const viewRoles = async () => {
-  const res = await query(
-    "SELECT role.title, role.id, role.department, role.salary FROM role"
-  );
-  // console.table() is a method that displays tabular data as a table - used to display the results of the query
-  console.table(res.rows);
+  try {
+    const res = await query(
+      "SELECT role.title, role.id, role.department, role.salary FROM role"
+    );
+    // console.table() is a method that displays tabular data as a table - used to display the results of the query
+    console.table(res.rows);
+  } catch (err) {
+    console.error("Error fetching roles: ", err);
+  }
 };
 
 //
@@ -29,14 +36,18 @@ export const viewRoles = async () => {
 // employee ids, first names, last names, job titles, departments, salaries, and managers
 //
 export const viewEmployees = async () => {
-  const res = await query(
-    `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
-    FROM employee 
-    JOIN role ON employee.role_id = role.id 
-    JOIN department ON role.department = department.id`
-  );
-  // console.table() is a method that displays tabular data as a table - used to display the results of the query
-  console.table(res.rows);
+  try {
+    const res = await query(
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
+      FROM employee 
+      JOIN role ON employee.role_id = role.id 
+      JOIN department ON role.department = department.id`
+    );
+    // console.table() is a method that displays tabular data as a table - used to display the results of the query
+    console.table(res.rows);
+  } catch (err) {
+    console.error("Error fetching employees: ", err);
+  }
 };
 
 //
@@ -51,9 +62,13 @@ export const addDepartment = async () => {
     },
   ]);
 
-  // use the answers.name to insert the department name into the department table
-  await query("INSERT INTO department (name) VALUES ($1)", [answers.name]);
-  console.log(`Department ${answers.name} added successfully.`);
+  try {
+    // use the answers.name to insert the department name into the department table
+    await query("INSERT INTO department (name) VALUES ($1)", [answers.name]);
+    console.log(`Department ${answers.name} added successfully.`);
+  } catch (err) {
+    console.error("Error adding department: ", err);
+  }
 };
 
 //
@@ -78,12 +93,16 @@ export const addRole = async () => {
       message: "Enter the department id number for the role:",
     },
   ]);
-
-  await query(
-    "INSERT INTO role (title, salary, department) VALUES ($1, $2, $3)",
-    [answers.title, answers.salary, answers.department]
-  );
-  console.log(`Role ${answers.title} added successfully.`);
+  // Add the role to the database
+  try {
+    await query(
+      "INSERT INTO role (title, salary, department) VALUES ($1, $2, $3)",
+      [answers.title, answers.salary, answers.department]
+    );
+    console.log(`Role ${answers.title} added successfully.`);
+  } catch (err) {
+    console.error("Error adding role: ", err);
+  }
 };
 
 //
@@ -114,13 +133,22 @@ export const addEmployee = async () => {
     },
   ]);
 
-  await query(
-    "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)",
-    [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]
-  );
-  console.log(
-    `Employee ${answers.first_name} ${answers.last_name} added successfully.`
-  );
+  try {
+    await query(
+      "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)",
+      [
+        answers.first_name,
+        answers.last_name,
+        answers.role_id,
+        answers.manager_id,
+      ]
+    );
+    console.log(
+      `Employee ${answers.first_name} ${answers.last_name} added successfully.`
+    );
+  } catch (err) {
+    console.error("Error adding employee: ", err);
+  }
 };
 
 //
@@ -166,11 +194,15 @@ export const updateEmployeeRole = async () => {
   );
   // Set the employee's role in the database where the employee id matches the selected employee id
   // Rather than using the employee id first in our query, we use it in the WHERE clause to specify which employee to update
-  await query("UPDATE employee SET role_id = $1 WHERE id = $2", [
-    answers.role_id,
-    answers.employee_id,
-  ]);
-  console.log("Employee role updated successfully.");
+  try {
+    await query("UPDATE employee SET role_id = $1 WHERE id = $2", [
+      answers.role_id,
+      answers.employee_id,
+    ]);
+    console.log("Employee role updated successfully.");
+  } catch (err) {
+    console.error("Error updating employee role: ", err);
+  }
 };
 
 //
@@ -248,16 +280,20 @@ export const viewEmployeesByManager = async () => {
   // role.department is the foreign key for department.id in the department table
   // take the manager_id from the managerAnswer object and use in the WHERE clause
   // to get all the employees with that manager_id
-  const res = await query(
-    `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
-    FROM employee 
-    JOIN role ON employee.role_id = role.id 
-    JOIN department ON role.department = department.id
-    WHERE employee.manager_id = $1`,
-    [managerAnswer.manager_id]
-  );
-  // console.table() is a method that displays tabular data as a table
-  console.table(res.rows);
+  try {
+    const res = await query(
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
+      FROM employee 
+      JOIN role ON employee.role_id = role.id 
+      JOIN department ON role.department = department.id
+      WHERE employee.manager_id = $1`,
+      [managerAnswer.manager_id]
+    );
+    // console.table() is a method that displays tabular data as a table
+    console.table(res.rows);
+  } catch (err) {
+    console.error("Error fetching employees by manager: ", err);
+  }
 };
 
 // View employees by department.
@@ -284,18 +320,167 @@ export const viewEmployeesByDepartment = async () => {
   // role.department is the foreign key for department.id in the department table
   // take the department_id from the departmentAnswer object and use in the WHERE clause
   // to get all the employees with that department_id
-  const res = await query(
-    `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
-    FROM employee 
-    JOIN role ON employee.role_id = role.id 
-    JOIN department ON role.department = department.id
-    WHERE department.id = $1`,
-    [departmentAnswer.department_id]
-  );
-  // console.table() is a method that displays tabular data as a table
-  console.table(res.rows);
+  try {
+    const res = await query(
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id 
+      FROM employee 
+      JOIN role ON employee.role_id = role.id 
+      JOIN department ON role.department = department.id
+      WHERE department.id = $1`,
+      [departmentAnswer.department_id]
+    );
+    // console.table() is a method that displays tabular data as a table
+    console.table(res.rows);
+  } catch (err) {
+    console.error("Error fetching employees by department: ", err);
+  }
 };
 
 // Delete departments, roles, and employees.
+export const deleteDepartment = async () => {
+  // Get a list of departments to choose from
+  const departments = await query("SELECT * FROM department");
+  // Create an array of choices for the inquirer prompt
+  const departmentChoices = departments.rows.map((department: any) => ({
+    name: department.name,
+    value: department.id,
+  }));
+  // Prompt the user to select a department to delete
+  const departmentAnswer = await inquirer.prompt([
+    {
+      type: "list",
+      name: "department_id",
+      message: "Select a department to delete:",
+      choices: departmentChoices,
+    },
+  ]);
 
+  // Delete the selected department from the database
+  try {
+    await query("DELETE FROM department WHERE id = $1", [
+      departmentAnswer.department_id,
+    ]);
+    console.log("Department deleted successfully.");
+  } catch (err) {
+    console.error("Error deleting department: ", err);
+  }
+};
+
+//
+// Delete roles.
+//
+export const deleteRole = async () => {
+  // Get a list of roles to choose from
+  const roles = await query("SELECT * FROM role");
+  // Create an array of choices for the inquirer prompt
+  const roleChoices = roles.rows.map((role: any) => ({
+    name: role.title,
+    value: role.id,
+  }));
+  // Prompt the user to select a role to delete
+  const roleAnswer = await inquirer.prompt([
+    {
+      type: "list",
+      name: "role_id",
+      message: "Select a role to delete:",
+      choices: roleChoices,
+    },
+  ]);
+
+  // Delete the selected role from the database
+  try {
+    await query("DELETE FROM role WHERE id = $1", [roleAnswer.role_id]);
+    console.log("Role deleted successfully.");
+  } catch (err) {
+    console.error("Error deleting role: ", err);
+  }
+};
+
+//
+// Delete employees.
+//
+export const deleteEmployee = async () => {
+  // Get a list of employees to choose from
+  const employees = await query("SELECT * FROM employee");
+  // Create an array of choices for the inquirer prompt
+  const employeeChoices = employees.rows.map((employee: any) => ({
+    name: `${employee.first_name} ${employee.last_name}`,
+    value: employee.id,
+  }));
+  // Prompt the user to select an employee to delete
+  const employeeAnswer = await inquirer.prompt([
+    {
+      type: "list",
+      name: "employee_id",
+      message: "Select an employee to delete:",
+      choices: employeeChoices,
+    },
+  ]);
+
+  // Delete the selected employee from the database
+  try {
+    await query("DELETE FROM employee WHERE id = $1", [
+      employeeAnswer.employee_id,
+    ]);
+    console.log("Employee deleted successfully.");
+  } catch (err) {
+    console.error("Error deleting employee: ", err);
+  }
+};
 // View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
+
+export const viewUtilizedBudgetByDepartment = async () => {
+  // Get a list of departments
+
+  try {
+    const departments = await query("SELECT * FROM department");
+    // Create an array of choices for the inquirer prompt with the department table
+    const departmentChoices = departments.rows.map((department) => ({
+      name: department.name,
+      value: department.id,
+    }));
+    const departmentAnswer = await inquirer.prompt([
+      {
+        type: "list",
+        name: "department_id",
+        message:
+          "Select a department to get the total utilized budget for that department:",
+        choices: departmentChoices,
+      },
+    ]);
+    // Query the database to get all the salaries for the employees with that id and sum them
+    // Using select sum we can total the salaries and select all the salaries then JOIN the other tables
+    // with deparment.id as the foreign key for role.department
+    // and role.id the foreign key for employee.role_id
+    // the table can be queried to only return the sums where the deparment matches the answered user prompt.
+    try {
+      const total = await query(
+        `SELECT SUM(role.salary) AS total_budget
+        FROM department
+        JOIN role ON role.department = department.id
+        JOIN employee ON employee.role_id = role.id
+        WHERE department.id = $1`,
+        [departmentAnswer.department_id]
+      );
+
+      // we have to go into total to get the total budget
+      const totalBudgetForDepartment = total.rows[0].total_budget;
+      console.log(departmentAnswer.department_id);
+
+      const departmentChoice = await query(
+        `SELECT name FROM department WHERE id = $1`,
+        [departmentAnswer.department_id]
+      );
+
+      console.log(
+        `The total utilized budget for ${
+          departmentChoice.rows[0].name
+        } is $${Math.round(totalBudgetForDepartment / 1000)}K.`
+      );
+    } catch (err) {
+      console.error("Error totalling budget for department: ", err);
+    }
+  } catch (err) {
+    console.error("Error fetching departments: ", err);
+  }
+};
