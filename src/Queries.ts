@@ -357,9 +357,32 @@ export const deleteDepartment = async () => {
 
   // Delete the selected department from the database
   try {
-    await query("DELETE FROM department WHERE id = $1", [
-      departmentAnswer.department_id,
-    ]);
+    await query(
+      `BEGIN;
+
+      -- Set role.department to NULL for roles in the department being deleted
+      UPDATE role SET role.department = NULL WHERE role.department = $1;
+      
+      -- Delete the department      
+      DELETE FROM department WHERE id = $1;
+      
+
+      -- Commit the transaction
+      COMMIT;
+
+      -- Notify that the department was deleted successfully
+      RAISE NOTICE 'Department was deleted successfully.';
+
+    EXCEPTION
+      WHEN OTHERS THEN
+        -- Log the error and rollback the transaction in case of failure
+        RAISE NOTICE 'An error occurred when deleting the department: %', SQLERRM;
+        ROLLBACK;
+
+    END;
+    `,
+      [departmentAnswer.department_id]
+    );
     console.log("Department deleted successfully.");
   } catch (err) {
     console.error("Error deleting department: ", err);
@@ -389,7 +412,32 @@ export const deleteRole = async () => {
 
   // Delete the selected role from the database
   try {
-    await query("DELETE FROM role WHERE id = $1", [roleAnswer.role_id]);
+    await query(
+      `BEGIN;
+
+      -- Set manager_id to NULL for employees who report to the manager being deleted
+      UPDATE employee SET role_id = NULL WHERE role_id = $1;
+      
+      -- Delete the role      
+      DELETE FROM role WHERE id = $1;
+      
+
+      -- Commit the transaction
+      COMMIT;
+
+      -- Notify that the role was deleted successfully
+      RAISE NOTICE 'Role was deleted successfully.';
+
+    EXCEPTION
+      WHEN OTHERS THEN
+        -- Log the error and rollback the transaction in case of failure
+        RAISE NOTICE 'An error occurred when deleting the role: %', SQLERRM;
+        ROLLBACK;
+
+    END;
+    `,
+      [roleAnswer.role_id]
+    );
     console.log("Role deleted successfully.");
   } catch (err) {
     console.error("Error deleting role: ", err);
@@ -419,9 +467,31 @@ export const deleteEmployee = async () => {
 
   // Delete the selected employee from the database
   try {
-    await query("DELETE FROM employee WHERE id = $1", [
-      employeeAnswer.employee_id,
-    ]);
+    await query(
+      `BEGIN;
+
+      -- Set manager_id to NULL for employees who report to the manager being deleted
+      UPDATE employee SET manager_id = NULL WHERE manager_id = $1;
+
+      -- Delete the employee
+      DELETE FROM employee WHERE id = $1;
+
+      -- Commit the transaction
+      COMMIT;
+
+      -- Notify that the employee was deleted successfully
+      RAISE NOTICE 'Employee was deleted successfully.';
+
+    EXCEPTION
+      WHEN OTHERS THEN
+        -- Log the error and rollback the transaction in case of failure
+        RAISE NOTICE 'An error occurred when adding the employee: %', SQLERRM;
+        ROLLBACK;
+
+    END;
+    `,
+      [employeeAnswer.employee_id]
+    );
     console.log("Employee deleted successfully.");
   } catch (err) {
     console.error("Error deleting employee: ", err);
