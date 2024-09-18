@@ -76,6 +76,14 @@ export const addDepartment = async () => {
 // name, salary, and department for the role and that role is added
 //
 export const addRole = async () => {
+  const departments = await query("SELECT * FROM department");
+
+  // Get a list of roles for inquirer prompt
+  const deparmentChoices = departments.rows.map((department: any) => ({
+    name: department.name,
+    value: department.id,
+  }));
+
   const answers = await inquirer.prompt([
     {
       type: "input",
@@ -88,11 +96,22 @@ export const addRole = async () => {
       message: "Enter the salary for the role:",
     },
     {
-      type: "number",
+      type: "list",
       name: "department",
-      message: "Enter the department id number for the role:",
+      message: "Select the department for the role:",
+      choices: deparmentChoices,
     },
   ]);
+  // Log the answers to the console to verify the correct values are being used
+  // console.log(
+  //   "answers.title: ",
+  //   answers.title,
+  //   "answers.salary: ",
+  //   answers.salary,
+  //   "answers.department: ",
+  //   answers.department
+  // );
+
   // Add the role to the database
   try {
     await query(
@@ -110,6 +129,20 @@ export const addRole = async () => {
 // first name, last name, role, and manager, and that employee is added to the database
 //
 export const addEmployee = async () => {
+  // Get a list of roles for inquirer prompt
+  const roles = await query("SELECT * FROM role");
+  const roleChoices = roles.rows.map((role: any) => ({
+    name: role.title,
+    value: role.id,
+  }));
+
+  // Get a list of employees for inquirer prompt for manager id
+  const employees = await query("SELECT * FROM employee");
+  const employeeChoices = employees.rows.map((employee: any) => ({
+    name: `${employee.first_name} ${employee.last_name}`,
+    value: employee.id,
+  }));
+
   const answers = await inquirer.prompt([
     {
       type: "input",
@@ -122,16 +155,29 @@ export const addEmployee = async () => {
       message: "Enter the employee's last name:",
     },
     {
-      type: "number",
+      type: "list",
       name: "role_id",
-      message: "Enter the role id number for the employee:",
+      message: "Select the role for the new employee:",
+      choices: roleChoices,
     },
     {
-      type: "number",
+      type: "list",
       name: "manager_id",
-      message: "Enter the manager id number for the employee:",
+      message: "Select an employee to be the manager for the new employee:",
+      choices: employeeChoices,
     },
   ]);
+  // Log the answers to the console to verify the correct values are being used
+  // console.log(
+  //   "answers.first_name: ",
+  //   answers.first_name,
+  //   "answers.last_name: ",
+  //   answers.last_name,
+  //   "answers.role_id: ",
+  //   answers.role_id,
+  //   "answers.manager_id: ",
+  //   answers.manager_id
+  // );
 
   try {
     await query(
@@ -186,12 +232,12 @@ export const updateEmployeeRole = async () => {
     },
   ]);
   // Log the answers to the console to verify the correct values are being used
-  console.log(
-    "answers.role_id: ",
-    answers.role_id,
-    "answers.employee_id: ",
-    answers.employee_id
-  );
+  // console.log(
+  //   "answers.role_id: ",
+  //   answers.role_id,
+  //   "answers.employee_id: ",
+  //   answers.employee_id
+  // );
   // Set the employee's role in the database where the employee id matches the selected employee id
   // Rather than using the employee id first in our query, we use it in the WHERE clause to specify which employee to update
   try {
@@ -354,41 +400,34 @@ export const deleteDepartment = async () => {
       choices: departmentChoices,
     },
   ]);
+  // Ensure this logs a valid ID
+  console.log("Department ID: ", departmentAnswer.department_id);
 
   // Delete the selected department from the database
   try {
-    await query(
-      `BEGIN;
+    // Start transaction
+    await query("BEGIN;");
 
-      -- Set role.department to NULL for roles in the department being deleted
-      UPDATE role SET role.department = NULL WHERE role.department = $1;
-      
-      -- Delete the department      
-      DELETE FROM department WHERE id = $1;
-      
+    // Update the roles to set department to NULL
+    await query(`UPDATE role SET department = NULL WHERE department = $1;`, [
+      departmentAnswer.department_id,
+    ]);
 
-      -- Commit the transaction
-      COMMIT;
+    // Delete the department
+    await query(`DELETE FROM department WHERE id = $1;`, [
+      departmentAnswer.department_id,
+    ]);
 
-      -- Notify that the department was deleted successfully
-      RAISE NOTICE 'Department was deleted successfully.';
+    // Commit transaction
+    await query("COMMIT;");
 
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Log the error and rollback the transaction in case of failure
-        RAISE NOTICE 'An error occurred when deleting the department: %', SQLERRM;
-        ROLLBACK;
-
-    END;
-    `,
-      [departmentAnswer.department_id]
-    );
     console.log("Department deleted successfully.");
   } catch (err) {
+    // Rollback transaction in case of error
+    await query("ROLLBACK;");
     console.error("Error deleting department: ", err);
   }
 };
-
 //
 // Delete roles.
 //
@@ -409,37 +448,30 @@ export const deleteRole = async () => {
       choices: roleChoices,
     },
   ]);
+  // Ensure this logs a valid role ID
+  console.log("Role ID: ", roleAnswer.role_id);
 
   // Delete the selected role from the database
   try {
-    await query(
-      `BEGIN;
+    // Start transaction
+    await query("BEGIN");
 
-      -- Set manager_id to NULL for employees who report to the manager being deleted
-      UPDATE employee SET role_id = NULL WHERE role_id = $1;
-      
-      -- Delete the role      
-      DELETE FROM role WHERE id = $1;
-      
+    // Set role_id to NULL for employees with the role being deleted
+    await query("UPDATE employee SET role_id = NULL WHERE role_id = $1", [
+      roleAnswer.role_id,
+    ]);
 
-      -- Commit the transaction
-      COMMIT;
+    // Delete the role
+    await query("DELETE FROM role WHERE id = $1", [roleAnswer.role_id]);
 
-      -- Notify that the role was deleted successfully
-      RAISE NOTICE 'Role was deleted successfully.';
+    // Commit transaction
+    await query("COMMIT");
 
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Log the error and rollback the transaction in case of failure
-        RAISE NOTICE 'An error occurred when deleting the role: %', SQLERRM;
-        ROLLBACK;
-
-    END;
-    `,
-      [roleAnswer.role_id]
-    );
+    // Notify that the role was deleted successfully
     console.log("Role deleted successfully.");
   } catch (err) {
+    // Rollback transaction in case of error
+    await query("ROLLBACK");
     console.error("Error deleting role: ", err);
   }
 };
@@ -464,41 +496,35 @@ export const deleteEmployee = async () => {
       choices: employeeChoices,
     },
   ]);
+  // Ensure this logs a valid employee ID
+  console.log("Employee ID: ", employeeAnswer.employee_id);
 
   // Delete the selected employee from the database
   try {
-    await query(
-      `BEGIN;
-
-      -- Set manager_id to NULL for employees who report to the manager being deleted
-      UPDATE employee SET manager_id = NULL WHERE manager_id = $1;
-
-      -- Delete the employee
-      DELETE FROM employee WHERE id = $1;
-
-      -- Commit the transaction
-      COMMIT;
-
-      -- Notify that the employee was deleted successfully
-      RAISE NOTICE 'Employee was deleted successfully.';
-
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Log the error and rollback the transaction in case of failure
-        RAISE NOTICE 'An error occurred when adding the employee: %', SQLERRM;
-        ROLLBACK;
-
-    END;
-    `,
-      [employeeAnswer.employee_id]
-    );
+    // Start transaction
+    await query("BEGIN");
+    // Set manager_id to NULL for employees with the manager being deleted
+    await query("UPDATE employee SET manager_id = NULL WHERE manager_id = $1", [
+      employeeAnswer.employee_id,
+    ]);
+    // Delete the employee
+    await query("DELETE FROM employee WHERE id = $1", [
+      employeeAnswer.employee_id,
+    ]);
+    // Commit transaction
+    await query("COMMIT");
+    // Notify that the employee was deleted successfully
     console.log("Employee deleted successfully.");
   } catch (err) {
+    // Rollback transaction in case of error
+    await query("ROLLBACK");
     console.error("Error deleting employee: ", err);
   }
 };
-// View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
 
+//
+// View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
+//
 export const viewUtilizedBudgetByDepartment = async () => {
   // Get a list of departments
 

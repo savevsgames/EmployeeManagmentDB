@@ -162,7 +162,7 @@ async function mainMenu() {
       await viewUtilizedBudgetByDepartment(); // async DB viewUtilizedBudgetByDepartment function
       break;
     case "Exit":
-      console.log("Goodbye!");
+      console.log("Thanks for using the Employee Management System! Goodbye.");
       process.exit(0);
   }
 
