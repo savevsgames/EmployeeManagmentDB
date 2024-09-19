@@ -1,5 +1,6 @@
 import inquirer from "inquirer";
-import pool from "./db";
+import pool from "./remote_db";
+import localPool from "./local_db";
 import {
   viewDepartments,
   viewRoles,
@@ -16,6 +17,17 @@ import {
   deleteEmployee,
   viewUtilizedBudgetByDepartment,
 } from "./Queries";
+
+const connectLocal = async (): Promise<Boolean> => {
+  try {
+    await localPool.connect();
+    console.log("Local database connected successfully!");
+    return true;
+  } catch (error) {
+    console.error("Error connecting to the local database:", error);
+    return false;
+  }
+};
 
 // To allow for when render needs time to spin up, the database will have a retry timer
 // The user will also be able to retry connection on command before the timer runs out and it retries again
@@ -171,7 +183,7 @@ async function mainMenu() {
 }
 
 // Main function to start the app
-const main = async () => {
+const remote = async () => {
   console.log("Checking database status...");
 
   // Wait until the database is ready before continuing
@@ -179,6 +191,37 @@ const main = async () => {
 
   // Proceed with the main menu logic
   await mainMenu();
+};
+
+// Local function to start the app
+const local = async () => {
+  // Wait until the database is locally connected before continuing
+  const locallyConnected = await connectLocal();
+  // Proceed with the main menu logic
+  if (locallyConnected) {
+    await mainMenu();
+  } else {
+    console.error("Local database connection failed.");
+    main(); // Retry the connection or choose remote
+  }
+};
+
+const main = async () => {
+  // Start the app
+  // If user wants to connect to remote database or local database we will ask them here
+  const answer = await inquirer.prompt([
+    {
+      type: "list",
+      name: "database",
+      message: "Connect to remote database or local database?",
+      choices: ["Remote", "Local"],
+    },
+  ]);
+  if (answer.database === "Remote") {
+    remote();
+  } else {
+    local();
+  }
 };
 
 main(); // Start the app

@@ -1,4 +1,4 @@
-import { query } from "./db"; // Location of DB connection function
+import { query } from "./remote_db"; // Location of DB connection function
 
 const seedDatabase = async () => {
   try {

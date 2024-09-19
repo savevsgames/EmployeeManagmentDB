@@ -9,11 +9,14 @@ CREATE TABLE department (
     name VARCHAR(30) NOT NULL
 );
 
+-- 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL NOT NULL,
     department INTEGER REFERENCES department(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE employee (

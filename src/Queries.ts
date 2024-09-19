@@ -1,4 +1,4 @@
-import { query } from "./db";
+import { query } from "./remote_db";
 import inquirer from "inquirer";
 
 //
